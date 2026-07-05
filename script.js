@@ -211,7 +211,7 @@ function normalize(text) {
 async function buildSearchIndex() {
   searchIndex.length = 0;
 
-  const res = await fetch("/docs/pages.json");
+  const res = await fetch("docs/pages.json");
   const ids = await res.json();
 
   for (const id of ids) {
