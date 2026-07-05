@@ -1,3 +1,24 @@
 [
-  "overview"
+  "overview",
+  
+  "render",
+  "ui",
+  "utils",
+
+  "base",
+
+  "clickBase",
+    "button",
+    "checkBox",
+    "radioButton",
+    
+  "panel",
+
+
+  "dropdown",
+
+  "label",
+  "list",
+  "slider",
+  "tabMenu"
 ]
