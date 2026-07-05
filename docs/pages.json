@@ -6,19 +6,17 @@
   "utils",
 
   "base",
+  "label",
 
   "clickBase",
-    "button",
-    "checkBox",
-    "radioButton",
+  "button",
+  "checkBox",
+  "radioButton",
+  "dropdown",
+  "slider",
     
   "panel",
-
-
-  "dropdown",
-
-  "label",
   "list",
-  "slider",
   "tabMenu"
+  
 ]
