@@ -45,6 +45,9 @@
   --code-bg: var(--surface-2);
   --code-text: var(--accent-soft);
   --code-border: var(--border-soft);
+
+  --link-color: #4db8ff;
+  --link-hover: #00ffff;
 }
 
 body[data-theme="light"] {
@@ -84,6 +87,9 @@ body[data-theme="light"] {
   --code-bg: var(--surface-2);
   --code-text: var(--accent);
   --code-border: var(--border-soft);
+
+  --link-color: #0066cc;
+  --link-hover: #0099ff;
 }
 
 /* =========================
@@ -204,25 +210,25 @@ nav {
 }
 
 .nav-header {
-    display: flex;
-    align-items: center;
-    gap: 10px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
 
-    margin: 18px 0 8px;
-    padding: 0 8px;
+  margin: 18px 0 8px;
+  padding: 0 8px;
 
-    color: var(--text-soft);
-    font-size: 11px;
-    font-weight: 700;
-    letter-spacing: .12em;
-    text-transform: uppercase;
+  color: var(--text-soft);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: .12em;
+  text-transform: uppercase;
 }
 
 .nav-header::after {
-    content: "";
-    flex: 1;
-    height: 1px;
-    background: var(--border);
+  content: "";
+  flex: 1;
+  height: 1px;
+  background: var(--border);
 }
 
 .nav-item {
@@ -436,19 +442,48 @@ main blockquote p {
   border-color: var(--accent);
 }
 
-main a {
-  color: var(--accent-link);
+/* ===================== LINKS ===================== */
+
+#content a {
+  color: var(--link-color);
   text-decoration: none;
-  transition: color .15s;
+
+  position: relative;
+  transition:
+    color .2s ease,
+    background-color .2s ease;
 }
 
-main a:hover {
-  color: var(--accent-link-hover);
-  text-decoration: underline;
+
+/* подчёркивание с анимацией */
+
+#content a::after {
+  content: "";
+
+  position: absolute;
+  left: 0;
+  bottom: -2px;
+
+  width: 0;
+  height: 2px;
+
+  background: var(--link-color);
+
+  transition: width .25s ease;
 }
 
-main a:visited {
-  color: var(--accent-link-visited);
+#content a:hover {
+  color: var(--link-hover);
+}
+
+#content a:hover::after {
+  width: 100%;
+}
+
+/* активное нажатие */
+
+#content a:active {
+  transform: translateY(1px);
 }
 
 /* =========================
