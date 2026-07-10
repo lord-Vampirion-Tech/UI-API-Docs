@@ -33,7 +33,9 @@ const contentEl = document.getElementById("content");
 const langBtn = document.getElementById("lang-btn");
 const themeToggle = document.getElementById("theme-toggle");
 const searchInput = document.getElementById("search");
+
 const searchIndex = [];
+history.scrollRestoration = "manual";
 
 const sunIcon = `
   <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
@@ -144,14 +146,46 @@ function customFormat(root) {
 
 // ===================== ROUTING =====================
 
-function getRoutePage() {
-  const hash = location.hash.replace("#", "").trim();
-  return hash || null;
+function getRoute() {
+
+  const hash = decodeURIComponent(location.hash.substring(1));
+
+  const slash = hash.indexOf("/");
+
+  if (slash === -1) {
+    return {
+      page: hash,
+      anchor: null
+    };
+  }
+
+  return {
+    page: hash.substring(0, slash),
+    anchor: hash.substring(slash + 1)
+  };
 }
 
-function setRoute(pageId) {
-  if (!pageId) return;
-  location.hash = pageId;
+
+function setRoute(pageId, anchor = null) {
+
+  const newHash = anchor
+    ? `${pageId}/${anchor}`
+    : pageId;
+
+
+  if (location.hash.substring(1) === newHash) {
+
+    applyRouteScroll({
+      page: pageId,
+      anchor
+    });
+
+    return;
+  }
+
+
+  location.hash = newHash;
+
 }
 
 // ===================== FRONT MATTER =====================
@@ -180,6 +214,20 @@ async function loadPages() {
   const pages = [];
 
   for (const id of ids) {
+    if (id === "---") {
+      pages.push({
+        type: "separator"
+      });
+      continue;
+    }
+    if (id.startsWith("#")) {
+      pages.push({
+        type: "header",
+        title: id.substring(1).trim()
+      });
+      continue;
+    }
+
     const res = await fetch(`docs/${id}/${state.lang}.md`);
     if (!res.ok) continue;
 
@@ -215,6 +263,8 @@ async function buildSearchIndex() {
   const ids = await res.json();
 
   for (const id of ids) {
+    if (id === "---" || id.startsWith("#"))
+      continue;
 
     const ru = await fetch(`docs/${id}/ru.md`).then(r => r.ok ? r.text() : null);
     const en = await fetch(`docs/${id}/en.md`).then(r => r.ok ? r.text() : null);
@@ -269,55 +319,90 @@ function searchPages(query) {
 // ===================== LOAD MARKDOWN =====================
 
 async function loadMarkdown(pageId) {
-  if (!pageId) {
-    contentEl.innerHTML = `<div class="error">No page found</div>`;
+  if (!pageId)
     return;
-  }
 
   state.currentPageId = pageId;
   const cacheKey = `${pageId}:${state.lang}`;
+  let pageObj;
 
-  // ===== CACHE =====
   if (state.cache.has(cacheKey)) {
-    renderPage(state.cache.get(cacheKey));
+
+    pageObj = state.cache.get(cacheKey);
+
+  } else {
+
+    let res = await fetch(
+      `docs/${pageId}/${state.lang}.md`
+    );
+
+    if (!res.ok) {
+      const fallback = state.lang === "ru" ? "en" : "ru";
+
+      res = await fetch(
+        `docs/${pageId}/${fallback}.md`
+      );
+
+      if (!res.ok) {
+        contentEl.innerHTML = `<div class="error">Page not found</div>`;
+        return;
+      }
+
+      state.lang = fallback;
+      langBtn.textContent = fallback.toUpperCase();
+    }
+
+    const raw = await res.text();
+    const parsed = parseFrontMatter(raw);
+
+    pageObj = {
+      id: pageId,
+      meta: parsed.data,
+      content: parsed.content
+    };
+
+    state.cache.set(
+      cacheKey,
+      pageObj
+    );
+  }
+
+  renderPage(pageObj);
+}
+
+function applyRouteScroll(route) {
+
+  if (route.anchor) {
+
+    requestAnimationFrame(() => {
+
+      const element = document.getElementById(route.anchor);
+
+      if (!element)
+        return;
+
+      contentEl.scrollTo({
+        top: element.offsetTop,
+        behavior: "smooth"
+      });
+    });
     return;
   }
 
-  // ===== FETCH =====
-  let res = await fetch(`docs/${pageId}/${state.lang}.md`);
-
-  // fallback language
-  if (!res.ok) {
-    const fallbackLang = state.lang === "ru" ? "en" : "ru";
-    res = await fetch(`docs/${pageId}/${fallbackLang}.md`);
-
-    if (!res.ok) {
-      contentEl.innerHTML = `<div class="error">Page not found</div>`;
-      return;
-    }
-
-    state.lang = fallbackLang;
-    langBtn.textContent = fallbackLang.toUpperCase();
-  }
-
-  const raw = await res.text();
-  const parsed = parseFrontMatter(raw);
-
-  const pageObj = {
-    id: pageId,
-    meta: parsed.data,
-    content: parsed.content
-  };
-
-  state.cache.set(cacheKey, pageObj);
-  renderPage(pageObj);
+  contentEl.scrollTo({
+    top: 0,
+    behavior: "smooth"
+  });
 }
 
 // ===================== RESOLVE PAGE =====================
 
 function resolvePage() {
-  const route = getRoutePage();
-  if (route) return route;
+  const route = getRoute();
+
+  if (route.page) {
+    return route.page;
+  }
 
   if (state.pages.length > 0) {
     return state.pages[0].id;
@@ -333,15 +418,60 @@ function renderPage(pageObj) {
 
   contentEl.innerHTML = marked.parse(pageObj.content || "");
 
+  contentEl.querySelectorAll("h1,h2,h3,h4,h5,h6").forEach(h => {
+
+    const match = h.textContent.match(/\{([^}]+)\}$/);
+
+    if (!match)
+      return;
+
+    const id = match[1].trim();
+
+    h.id = id;
+    h.textContent = h.textContent.replace(
+      /\s*\{[^}]+\}$/,
+      ""
+    );
+
+  });
+
   const blocks = contentEl.querySelectorAll("pre code");
 
   for (const block of blocks) {
     hljs.highlightElement(block);
   }
- 
+
   customFormat(contentEl);
+  setupMarkdownLinks();
 
   renderNav();
+}
+
+function setupMarkdownLinks() {
+
+  contentEl.querySelectorAll("a").forEach(link => {
+
+    const href = link.getAttribute("href");
+
+    if (!href || !href.startsWith("#"))
+      return;
+
+    link.onclick = e => {
+
+      e.preventDefault();
+
+      const route = href.substring(1);
+      const [page, anchor] = route.split("/");
+
+      setRoute(
+        page,
+        anchor
+      );
+
+    };
+
+  });
+
 }
 
 // ===================== NAVIGATION =====================
@@ -350,6 +480,24 @@ function renderNav(list = state.pages) {
   navEl.innerHTML = "";
 
   for (const p of list) {
+    if (p.type === "separator") {
+
+      const hr = document.createElement("div");
+      hr.className = "nav-separator";
+      navEl.appendChild(hr);
+
+      continue;
+    }
+    if (p.type === "header") {
+
+      const h = document.createElement("div");
+      h.className = "nav-header";
+      h.textContent = p.title;
+      navEl.appendChild(h);
+
+      continue;
+    }
+
     const btn = document.createElement("button");
 
     btn.textContent = p.title || p.id;
@@ -362,8 +510,20 @@ function renderNav(list = state.pages) {
     }
 
     btn.onclick = () => {
+      const route = getRoute();
+
+      if (route.page === p.id) {
+
+        applyRouteScroll({
+          page: p.id,
+          anchor: null
+        });
+        console.log(route)
+
+        return;
+      }
+
       setRoute(p.id);
-      loadMarkdown(p.id);
     };
 
     navEl.appendChild(btn);
@@ -375,11 +535,11 @@ function renderNav(list = state.pages) {
 async function toggleLanguage() {
   state.lang = state.lang === "ru" ? "en" : "ru";
   langBtn.textContent = state.lang.toUpperCase();
- 
+
   await loadPages();
- 
+
   renderNav();
- 
+
   if (state.currentPageId) {
     loadMarkdown(state.currentPageId);
   }
@@ -387,10 +547,15 @@ async function toggleLanguage() {
 
 // ===================== ROUTE LISTENER =====================
 
-window.addEventListener("hashchange", () => {
-  const page = resolvePage();
-  window.scrollTo({ top: 0, behavior: "smooth" });
-  loadMarkdown(page);
+window.addEventListener("hashchange", async () => {
+  const route = getRoute();
+
+  if (!route.page)
+    return;
+
+  await loadMarkdown(route.page);
+
+  applyRouteScroll(route);
 });
 
 // ===================== INIT =====================
@@ -405,9 +570,16 @@ async function init() {
     return;
   }
 
-  location.hash = page;
+  if (!location.hash) {
+    location.hash = page;
+  }
 
   await loadMarkdown(page);
+
+  applyRouteScroll(
+    getRoute()
+  );
+
   renderNav();
 }
 

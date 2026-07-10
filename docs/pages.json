@@ -1,22 +1,22 @@
 [
+  "# General",
   "overview",
-  
+  "---",
   "render",
   "ui",
   "utils",
-
+  "---",
   "base",
   "label",
-
+  "# Components",
   "clickBase",
   "button",
   "checkBox",
   "radioButton",
   "dropdown",
   "slider",
-    
+  "---",
   "panel",
   "list",
   "tabMenu"
-  
 ]
