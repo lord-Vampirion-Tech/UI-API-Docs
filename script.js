@@ -21,7 +21,7 @@ history.scrollRestoration = "manual";
 
 const BASE =
 location.pathname.split('/')[1]
-  ? `/${location.pathname.split('/')[1]}`
+  ? `/${location.pathname.split('/')[1]}/`
   : "/";
 
 // ===================== THEME =====================
@@ -361,7 +361,7 @@ async function loadPages() {
 async function loadSearch() {
   const data =
     await fetch(
-      `${BASE}/search.json`
+      `${BASE}docs/search.json`
     ).then(r => r.json());
 
   state.searchIndex =
