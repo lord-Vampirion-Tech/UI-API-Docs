@@ -1,0 +1,76 @@
+<h1>Обзор библиотеки UI !</h1>
+<p><a href="#overview/fast_start"># ссылка тест</a></p>
+<p><a href="#ui"># ссылка тест</a></p>
+<p>Это небольшая библиотека для создания простых интерфейсов в CC-Tweaked. Она построена вокруг буфера отрисовки, общего контейнера UI и набора компонентов.</p>
+<!-- > NOTE:
+> Это обычная заметка.
+
+> WARNING:
+> Не вызывайте этот метод вручную.
+
+> TIP:
+> Используйте ui.button вместо base. --><h2>Основная идея</h2>
+<p>Библиотека работает по событийной модели:</p>
+<ol>
+<li>Создаётся экземпляр UI-контейнера.</li>
+<li>В него добавляются элементы. (панели, кнопки, и тд)</li>
+<li>UI обрабатывает события мыши и перерисовывает интерфейс.</li>
+</ol>
+<h2>Основные части</h2>
+<table>
+<thead>
+<tr>
+<th>Функция</th>
+<th>Что делает</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>render</td>
+<td>буфер отрисовки, который хранит символы, цвета текста и фон.</td>
+</tr>
+<tr>
+<td>utils</td>
+<td>служебные функции: создание классов, выравнивание текста, работа с координатами и clipping.</td>
+</tr>
+<tr>
+<td>ui</td>
+<td>корневой контейнер приложения, который хранит элементы и запускает цикл событий.</td>
+</tr>
+<tr>
+<td>modules</td>
+<td>готовые компоненты интерфейса. По желаюнию можете дописывать и свои модули</td>
+</tr>
+</tbody></table>
+<p>Вся библиотке построена по принципу OOP и модульности. Каждый модуль может быть как обычным классом, так и наследованным от другова, получая его свойства и функции. </p>
+<hr>
+
+<h2 id="fast_start">
+Быстрый старт
+</h2>
+
+<blockquote>
+<p>Примечание: 
+обьяснение как это работает описанно далее в <a href="#ui">ui</a></p>
+</blockquote>
+
+<pre><code class="hljs language-lua">
+<span class="hljs-keyword">local</span> ui = <span class="hljs-built_in">require</span>(<span class="hljs-string">&quot;ui&quot;</span>)
+
+<span class="hljs-keyword">local</span> title = ui.label(<span class="hljs-number">2</span>, <span class="hljs-number">2</span>, <span class="hljs-number">20</span>, <span class="hljs-string">&quot;Hello&quot;</span>, <span class="hljs-string">&quot;c&quot;</span>)
+<span class="hljs-keyword">local</span> button = ui.button(<span class="hljs-number">2</span>, <span class="hljs-number">4</span>, <span class="hljs-number">12</span>, <span class="hljs-number">3</span>, <span class="hljs-string">&quot;OK&quot;</span>, <span class="hljs-string">&quot;c&quot;</span>, <span class="hljs-function"><span class="hljs-keyword">function</span><span class="hljs-params">()</span></span>
+  title.text = <span class="hljs-string">&quot;Good Job!&quot;</span>
+<span class="hljs-keyword">end</span>)
+
+ui:add(title)
+ui:add(button)
+ui:start()
+</code></pre>
+<h2>Что можно сделать</h2>
+<ul>
+<li>создавать простые окна и панели;</li>
+<li>добавлять кнопки и переключатели;</li>
+<li>отображать списки и выпадающие меню;</li>
+<li>использовать вкладки и слайдеры;</li>
+<li>управлять положением, видимостью и событиями элементов.</li>
+</ul>
+<hr>

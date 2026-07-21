@@ -4,583 +4,652 @@ const state = {
   lang: "ru",
   pages: [],
   currentPageId: null,
-  currentPage: null,
-  cache: new Map()
+  cache: new Map(),
+  searchIndex: []
 };
-
-const callouts = [
-  { type: "note", variants: ["Note:", "Примечание:", "Заметка:",] },
-  { type: "warning", variants: ["Warning:", "Предупреждение:"] },
-  { type: "tip", variants: ["Tip:", "Совет:", "Подсказка:"] }
-];
 
 // ===================== ELEMENTS =====================
 
-import matter from "https://cdn.jsdelivr.net/npm/gray-matter/+esm";
-import { marked } from "https://cdn.jsdelivr.net/npm/marked/+esm";
-
-marked.setOptions({
-  highlight: (code, lang) => {
-    if (lang && hljs.getLanguage(lang)) {
-      return hljs.highlight(code, { language: lang }).value;
-    }
-    return hljs.highlightAuto(code).value;
-  }
-});
-
 const navEl = document.getElementById("navigation");
 const contentEl = document.getElementById("content");
+
 const langBtn = document.getElementById("lang-btn");
 const themeToggle = document.getElementById("theme-toggle");
 const searchInput = document.getElementById("search");
-
-const searchIndex = [];
+const projectName = document.getElementById("project-name");
 history.scrollRestoration = "manual";
 
+// ===================== THEME =====================
+
 const sunIcon = `
-  <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-    <path d="M12 3v2.2M12 18.8V21M4.9 4.9l1.6 1.6M17.5 17.5l1.6 1.6M3 12h2.2M18.8 12H21M4.9 19.1l1.6-1.6M17.5 6.5l1.6-1.6M12 7.2a4.8 4.8 0 1 0 0 9.6 4.8 4.8 0 0 0 0-9.6Z"/>
-  </svg>`;
+<svg viewBox="0 0 24 24">
+<path d="M12 3v2.2M12 18.8V21M4.9 4.9l1.6 1.6M17.5 17.5l1.6 1.6M3 12h2.2M18.8 12H21"/>
+</svg>`;
 
 const moonIcon = `
-  <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-    <path d="M20 14.5A8.5 8.5 0 0 1 9.5 4a8.5 8.5 0 1 0 10.5 10.5Z"/>
-  </svg>`;
+<svg viewBox="0 0 24 24">
+<path d="M20 14.5A8.5 8.5 0 0 1 9.5 4a8.5 8.5 0 1 0 10.5 10.5Z"/>
+</svg>`;
 
-langBtn.addEventListener("click", toggleLanguage);
 
-themeToggle?.addEventListener("click", toggleTheme);
-
-function getPreferredTheme() {
-  const savedTheme = localStorage.getItem("theme");
-  if (savedTheme === "light" || savedTheme === "dark") return savedTheme;
-
-  return window.matchMedia("(prefers-color-scheme: light)").matches ? "light" : "dark";
-}
 
 function applyTheme(theme) {
-  document.body.setAttribute("data-theme", theme);
-  localStorage.setItem("theme", theme);
+  document.body.dataset.theme = theme;
+  localStorage.theme = theme;
 
   if (themeToggle) {
-    themeToggle.innerHTML = theme === "light" ? moonIcon : sunIcon;
-    themeToggle.setAttribute("aria-label", theme === "light" ? "Switch to dark theme" : "Switch to light theme");
-    themeToggle.title = theme === "light" ? "Switch to dark theme" : "Switch to light theme";
+    themeToggle.innerHTML =
+      theme === "light"
+        ? moonIcon
+        : sunIcon;
   }
+}
+
+function getPreferredTheme() {
+  return (
+    localStorage.theme ||
+    (
+      matchMedia("(prefers-color-scheme:light)")
+        .matches
+        ? "light"
+        : "dark"
+    )
+  );
 }
 
 function toggleTheme() {
-  const currentTheme = document.body.getAttribute("data-theme") === "light" ? "dark" : "light";
-  applyTheme(currentTheme);
+  applyTheme(
+    document.body.dataset.theme === "light"
+      ? "dark"
+      : "light"
+  );
 }
 
-applyTheme(getPreferredTheme());
+applyTheme(
+  getPreferredTheme()
+);
 
-searchInput.addEventListener("input", (e) => {
-  const results = searchPages(e.target.value);
-  renderNav(results);
-});
+themeToggle?.addEventListener(
+  "click",
+  toggleTheme
+);
 
-// ===================================================
+projectName?.addEventListener(
+  "click",
+  () => {
 
-function detectCallout(text) {
-  const t = text;
+    history.pushState(
+      null,
+      "",
+      location.pathname
+    );
 
-  for (const c of callouts) {
-    for (const v of c.variants) {
-      if (t.startsWith(v)) {
-        return {
-          type: c.type,
-          matched: v
-        };
-      }
-    }
+    loadRoot();
+  }
+);
+
+async function loadRoot() {
+
+  const htmlRes =
+    await fetch(
+      `docs/root/${state.lang}.html`
+    );
+
+  if (!htmlRes.ok)
+    return;
+
+  const metaRes =
+    await fetch(
+      `docs/root/${state.lang}.json`
+    );
+
+  const html =
+    await htmlRes.text();
+
+  const meta =
+    metaRes.ok
+      ? await metaRes.json()
+      : {};
+
+  contentEl.innerHTML = html;
+
+  const projectName =
+    document.getElementById(
+      "project-name"
+    );
+
+  if (projectName && meta.title) {
+    projectName.textContent =
+      meta.title ?? "Documentation";
   }
 
-  return null;
+  state.currentPageId = "root";
 }
+
+async function updateProjectTitle() {
+  const projectName =
+    document.getElementById(
+      "project-name"
+    );
+
+  if (!projectName)
+    return;
+
+
+  const res =
+    await fetch(
+      `docs/root/${state.lang}.json`
+    );
+
+
+  if (!res.ok) {
+    projectName.textContent =
+      "Documentation";
+
+    return;
+  }
+
+
+  const meta =
+    await res.json();
+
+
+  projectName.textContent =
+    meta.title || "Documentation";
+}
+
+// ===================== CALL OUTS =====================
+
+const callouts = [
+  {
+    type: "note",
+    words: [
+      "Note:",
+      "Примечание:",
+      "Заметка:"
+    ]
+  },
+  {
+    type: "warning",
+    words: [
+      "Warning:",
+      "Предупреждение:"
+    ]
+  },
+  {
+    type: "tip",
+    words: [
+      "Tip:",
+      "Совет:",
+      "Подсказка:"
+    ]
+  }
+];
 
 function customFormat(root) {
-  const codeBlocks = root.querySelectorAll("pre code");
 
-  for (const block of codeBlocks) {
-    let html = block.innerHTML;
+  root.querySelectorAll(
+    "pre code"
+  )
+    .forEach(block => {
 
-    // пример 1: ":func("
-    html = html.replace(
-      /:([a-zA-Z_]\w*)(\()/g,
-      ':<span class="custom-func1">$1</span>$2'
-    );
+      let html = block.innerHTML;
 
-    // пример 1: ".func("
-    html = html.replace(
-      /\.([a-zA-Z_]\w*)(\()/g,
-      '.<span class="custom-func2">$1</span>$2'
-    );
+      html = html.replace(
+        /:([a-zA-Z_]\w*)(\()/g,
+        ':<span class="custom-func1">$1</span>$2'
+      );
 
+      html = html.replace(
+        /\.([a-zA-Z_]\w*)(\()/g,
+        '.<span class="custom-func2">$1</span>$2'
+      );
 
-    block.innerHTML = html;
-  }
+      block.innerHTML = html;
+    });
 
-  root.querySelectorAll("blockquote").forEach(block => {
-    const p = block.querySelector("p");
-    if (!p) return;
+  root.querySelectorAll(
+    "blockquote"
+  )
+    .forEach(block => {
 
-    const html = p.innerHTML;
+      const p = block.querySelector("p");
 
-    const result = detectCallout(html);
-    if (!result) return;
+      if (!p)
+        return;
 
-    const { type, matched } = result;
+      const text =
+        p.innerHTML;
 
-    block.classList.add(type);
+      for (const c of callouts) {
+        for (const w of c.words) {
 
-    // ❗ ВАЖНО: не заменяем текст, а просто убираем префикс
-    p.innerHTML = html.replace(
-      new RegExp(`^${matched}`, "i"),
-      `<strong>${matched}</strong>`
-    );
-  });
+          if (text.startsWith(w)) {
 
+            block.classList.add(
+              c.type
+            );
+
+            p.innerHTML =
+              text.replace(
+                w,
+                `<strong>${w}</strong>`
+              );
+
+            return;
+          }
+        }
+      }
+    });
 }
 
 // ===================== ROUTING =====================
 
 function getRoute() {
+  const hash =
+    decodeURIComponent(
+      location.hash.slice(1)
+    );
 
-  const hash = decodeURIComponent(location.hash.substring(1));
-
-  const slash = hash.indexOf("/");
-
-  if (slash === -1) {
+  if (!hash)
     return {
-      page: hash,
+      page: null,
       anchor: null
     };
-  }
+
+  const parts =
+    hash.split("/");
 
   return {
-    page: hash.substring(0, slash),
-    anchor: hash.substring(slash + 1)
+    page: parts[0],
+    anchor:
+      parts.length > 1
+        ? parts.slice(1).join("/")
+        : null
   };
 }
 
+function getPageMeta(id) {
+  return state.searchIndex[id];
+}
 
-function setRoute(pageId, anchor = null) {
+function setRoute(
+  page,
+  anchor = null
+) {
+  location.hash =
+    anchor
+      ? `${page}/${anchor}`
+      : page;
+}
 
-  const newHash = anchor
-    ? `${pageId}/${anchor}`
-    : pageId;
+function scrollToAnchor(anchor) {
 
-
-  if (location.hash.substring(1) === newHash) {
-
-    applyRouteScroll({
-      page: pageId,
-      anchor
+  if (!anchor) {
+    contentEl.scrollTo({
+      top: 0,
+      behavior: "smooth"
     });
-
     return;
   }
 
+  requestAnimationFrame(() => {
 
-  location.hash = newHash;
+    const el =
+      document.getElementById(anchor);
 
-}
-
-// ===================== FRONT MATTER =====================
-
-function parseFrontMatter(raw) {
-  const parsed = matter(raw);
-  return {
-    data: parsed.data || {},
-    content: parsed.content || ""
-  };
-}
-
-// ===================== LOAD PAGES =====================
-
-async function loadPages() {
-  const res = await fetch("docs/pages.json");
-
-  if (!res.ok) {
-    console.error("Failed to load pages.json");
-    state.pages = [];
-    return;
-  }
-
-  const ids = await res.json();
-
-  const pages = [];
-
-  for (const id of ids) {
-    if (id === "---") {
-      pages.push({
-        type: "separator"
-      });
-      continue;
-    }
-    if (id.startsWith("#")) {
-      pages.push({
-        type: "header",
-        title: id.substring(1).trim()
-      });
-      continue;
-    }
-
-    const res = await fetch(`docs/${id}/${state.lang}.md`);
-    if (!res.ok) continue;
-
-    const raw = await res.text();
-    const parsed = matter(raw);
-
-    const page = {
-      id,
-      title: parsed.data.title || id,
-      depth: parsed.data.depth ?? 0,
-      tags: parsed.data.tags || []
-    };
-
-    pages.push(page);
-  }
-
-  state.pages = pages;
-  buildSearchIndex();
-}
-
-function normalize(text) {
-  return (text || "")
-    .toString()
-    .toLowerCase()
-    .trim();
-}
-
-
-async function buildSearchIndex() {
-  searchIndex.length = 0;
-
-  const res = await fetch("docs/pages.json");
-  const ids = await res.json();
-
-  for (const id of ids) {
-    if (id === "---" || id.startsWith("#"))
-      continue;
-
-    const ru = await fetch(`docs/${id}/ru.md`).then(r => r.ok ? r.text() : null);
-    const en = await fetch(`docs/${id}/en.md`).then(r => r.ok ? r.text() : null);
-
-    const ruData = ru ? matter(ru).data : {};
-    const enData = en ? matter(en).data : {};
-
-    searchIndex.push({
-      id,
-      title: {
-        ru: ruData.title || id,
-        en: enData.title || id
-      },
-      tags: [
-        ...(ruData.tags || []),
-        ...(enData.tags || [])
-      ]
-    });
-  }
-}
-
-function searchPages(query) {
-  const q = normalize(query);
-
-  if (!q) return state.pages;
-
-  const results = [];
-
-  for (const item of searchIndex) {
-    let score = 0;
-
-    const title = normalize(item.title[state.lang]);
-    const tags = item.tags.map(normalize);
-
-    if (title.includes(q)) score += 5;
-
-    for (const tag of tags) {
-      if (tag.includes(q)) score += 10;
-    }
-
-    if (score > 0) {
-      results.push({
-        id: item.id,
-        title: item.title[state.lang],
-        score
-      });
-    }
-  }
-
-  return results.sort((a, b) => b.score - a.score);
-}
-// ===================== LOAD MARKDOWN =====================
-
-async function loadMarkdown(pageId) {
-  if (!pageId)
-    return;
-
-  state.currentPageId = pageId;
-  const cacheKey = `${pageId}:${state.lang}`;
-  let pageObj;
-
-  if (state.cache.has(cacheKey)) {
-
-    pageObj = state.cache.get(cacheKey);
-
-  } else {
-
-    let res = await fetch(
-      `docs/${pageId}/${state.lang}.md`
-    );
-
-    if (!res.ok) {
-      const fallback = state.lang === "ru" ? "en" : "ru";
-
-      res = await fetch(
-        `docs/${pageId}/${fallback}.md`
-      );
-
-      if (!res.ok) {
-        contentEl.innerHTML = `<div class="error">Page not found</div>`;
-        return;
-      }
-
-      state.lang = fallback;
-      langBtn.textContent = fallback.toUpperCase();
-    }
-
-    const raw = await res.text();
-    const parsed = parseFrontMatter(raw);
-
-    pageObj = {
-      id: pageId,
-      meta: parsed.data,
-      content: parsed.content
-    };
-
-    state.cache.set(
-      cacheKey,
-      pageObj
-    );
-  }
-
-  renderPage(pageObj);
-}
-
-function applyRouteScroll(route) {
-
-  if (route.anchor) {
-
-    requestAnimationFrame(() => {
-
-      const element = document.getElementById(route.anchor);
-
-      if (!element)
-        return;
-
+    if (el) {
       contentEl.scrollTo({
-        top: element.offsetTop,
+        top: el.offsetTop,
         behavior: "smooth"
       });
+    }
+  });
+}
+
+// ===================== LOAD DATA =====================
+
+async function loadPages() {
+  state.pages =
+    await fetch(
+      "docs/pages.json"
+    ).then(r => r.json());
+
+  state.pages =
+    state.pages.map(item => {
+
+      if (item === "---") {
+        return {
+          type: "separator"
+        };
+      }
+
+      if (item.startsWith("#")) {
+        return {
+          type: "header",
+          title: item.slice(1)
+        };
+      }
+
+      const meta = getPageMeta(item);
+
+      return {
+        type: "page",
+
+        id: item,
+
+        title:
+          meta?.title[state.lang]
+          ||
+          item,
+
+        depth:
+          meta?.depth
+          ??
+          0
+      };
+
     });
-    return;
-  }
 
-  contentEl.scrollTo({
-    top: 0,
-    behavior: "smooth"
-  });
 }
 
-// ===================== RESOLVE PAGE =====================
+async function loadSearch() {
+  const data =
+    await fetch(
+      "docs/search.json"
+    ).then(r => r.json());
 
-function resolvePage() {
-  const route = getRoute();
-
-  if (route.page) {
-    return route.page;
-  }
-
-  if (state.pages.length > 0) {
-    return state.pages[0].id;
-  }
-
-  return null;
-}
-
-// ===================== RENDER =====================
-
-function renderPage(pageObj) {
-  state.currentPage = pageObj;
-
-  contentEl.innerHTML = marked.parse(pageObj.content || "");
-
-  contentEl.querySelectorAll("h1,h2,h3,h4,h5,h6").forEach(h => {
-
-    const match = h.textContent.match(/\{([^}]+)\}$/);
-
-    if (!match)
-      return;
-
-    const id = match[1].trim();
-
-    h.id = id;
-    h.textContent = h.textContent.replace(
-      /\s*\{[^}]+\}$/,
-      ""
+  state.searchIndex =
+    Object.fromEntries(
+      data.map(
+        x => [
+          x.id,
+          x
+        ]
+      )
     );
-
-  });
-
-  const blocks = contentEl.querySelectorAll("pre code");
-
-  for (const block of blocks) {
-    hljs.highlightElement(block);
-  }
-
-  customFormat(contentEl);
-  setupMarkdownLinks();
-
-  renderNav();
 }
 
-function setupMarkdownLinks() {
+// ===================== SEARCH =====================
 
-  contentEl.querySelectorAll("a").forEach(link => {
+function searchPages(query) {
 
-    const href = link.getAttribute("href");
+  if (!query)
+    return state.pages;
 
-    if (!href || !href.startsWith("#"))
-      return;
+  query = query.toLowerCase();
 
-    link.onclick = e => {
+  return state.searchIndex
+    .filter(p => {
 
-      e.preventDefault();
-
-      const route = href.substring(1);
-      const [page, anchor] = route.split("/");
-
-      setRoute(
-        page,
-        anchor
+      return (
+        p.title.ru
+          .toLowerCase()
+          .includes(query)
+        ||
+        p.title.en
+          .toLowerCase()
+          .includes(query)
+        ||
+        p.tags.some(
+          t =>
+            t.toLowerCase()
+              .includes(query)
+        )
       );
-
-    };
-
-  });
-
+    })
+    .map(p => ({
+      type: "page",
+      id: p.id,
+      title: p.title[state.lang]
+    }));
 }
 
-// ===================== NAVIGATION =====================
+// ===================== NAV =====================
 
 function renderNav(list = state.pages) {
+
   navEl.innerHTML = "";
 
   for (const p of list) {
-    if (p.type === "separator") {
 
-      const hr = document.createElement("div");
-      hr.className = "nav-separator";
-      navEl.appendChild(hr);
+    if (p.type === "separator") {
+      const div =
+        document.createElement(
+          "div"
+        );
+      div.className = "nav-separator";
+      navEl.append(div);
 
       continue;
     }
+
     if (p.type === "header") {
 
-      const h = document.createElement("div");
-      h.className = "nav-header";
-      h.textContent = p.title;
-      navEl.appendChild(h);
+      const div =
+        document.createElement(
+          "div"
+        );
+
+      div.className = "nav-header";
+      div.textContent = p.title;
+      navEl.append(div);
 
       continue;
     }
 
-    const btn = document.createElement("button");
+    const btn =
+      document.createElement(
+        "button"
+      );
 
+    btn.className = "nav-item";
     btn.textContent = p.title || p.id;
-    btn.classList.add("nav-item");
+    btn.style.setProperty(
+      "--depth",
+      p.depth ?? 0
+    );
 
-    btn.style.setProperty("--depth", (p.depth ?? 0) + 1);
-
-    if (p.id === state.currentPageId) {
-      btn.classList.add("active");
-    }
+    if (p.id === state.currentPageId)
+      btn.classList.add(
+        "active"
+      );
 
     btn.onclick = () => {
-      const route = getRoute();
-
-      if (route.page === p.id) {
-
-        applyRouteScroll({
-          page: p.id,
-          anchor: null
-        });
-        console.log(route)
-
-        return;
-      }
-
-      setRoute(p.id);
+      setRoute(
+        p.id
+      );
     };
 
-    navEl.appendChild(btn);
+    navEl.append(btn);
+
   }
 }
 
-// ===================== LANGUAGE SWITCH =====================
+// ===================== LOAD HTML =====================
+
+async function loadPage(id) {
+
+  state.currentPageId = id;
+
+  const key = `${id}:${state.lang}`;
+  let html = state.cache.get(key);
+
+  if (!html) {
+
+    let res =
+      await fetch(
+        `docs/${id}/${state.lang}.html`
+      );
+
+    if (!res.ok) {
+      const fallback =
+        state.lang === "ru"
+          ? "en"
+          : "ru";
+
+      res =
+        await fetch(
+          `docs/${id}/${fallback}.html`
+        );
+    }
+
+    html = await res.text();
+    state.cache.set(key, html);
+  }
+
+  contentEl.innerHTML = html;
+
+  customFormat(contentEl);
+  setupLinks();
+  renderNav();
+}
+
+// ===================== INTERNAL LINKS =====================
+
+function setupLinks() {
+
+  contentEl
+    .querySelectorAll("a")
+    .forEach(link => {
+
+      const href = link.getAttribute("href");
+
+      if (
+        !href ||
+        !href.startsWith("#")
+      )
+        return;
+
+      link.onclick = e => {
+
+        e.preventDefault();
+
+        const route =
+          href.slice(1)
+            .split("/");
+
+        setRoute(
+          route[0],
+          route.slice(1).join("/")
+          ||
+          null
+        );
+      };
+    });
+}
+
+// ===================== HASH =====================
+
+window.addEventListener(
+  "hashchange",
+  async () => {
+
+    const route = getRoute();
+
+    if (route.page) {
+      await loadPage(
+        route.page
+      );
+
+      scrollToAnchor(
+        route.anchor
+      );
+    }
+  });
+
+// ===================== LANGUAGE =====================
 
 async function toggleLanguage() {
-  state.lang = state.lang === "ru" ? "en" : "ru";
+  state.lang =
+    state.lang === "ru"
+      ? "en"
+      : "ru";
+
   langBtn.textContent = state.lang.toUpperCase();
 
-  await loadPages();
-
+  updatePageTitles();
+  await updateProjectTitle();
   renderNav();
 
-  if (state.currentPageId) {
-    loadMarkdown(state.currentPageId);
+  state.cache.clear();
+
+  if (state.currentPageId === "root") {
+    loadRoot();
+  }
+  else if (state.currentPageId) {
+    await loadPage(
+      state.currentPageId
+    );
   }
 }
 
-// ===================== ROUTE LISTENER =====================
+langBtn?.addEventListener(
+  "click",
+  toggleLanguage
+);
 
-window.addEventListener("hashchange", async () => {
-  const route = getRoute();
+function updatePageTitles() {
+  state.pages.forEach(page => {
+    if (page.type !== "page")
+      return;
 
-  if (!route.page)
-    return;
+    const meta = state.searchIndex[page.id];
 
-  await loadMarkdown(route.page);
+    if (meta) {
+      page.title =
+        meta.title[state.lang]
+        ??
+        meta.title.ru
+        ??
+        page.id;
+    }
+  });
+}
 
-  applyRouteScroll(route);
-});
+// ===================== SEARCH =====================
+
+searchInput?.addEventListener(
+  "input",
+  e => {
+
+    renderNav(
+      searchPages(
+        e.target.value
+      )
+    );
+  });
 
 // ===================== INIT =====================
 
 async function init() {
+
+  await loadSearch();
   await loadPages();
+  await updateProjectTitle();
 
-  const page = resolvePage();
+  renderNav();
 
-  if (!page) {
-    contentEl.innerHTML = `<div class="error">No pages found</div>`;
+  const route = getRoute();
+
+
+  // главная страница
+  if (!route.page) {
+
+    await loadRoot();
+
     return;
   }
 
-  if (!location.hash) {
-    location.hash = page;
-  }
 
-  await loadMarkdown(page);
-
-  applyRouteScroll(
-    getRoute()
+  await loadPage(
+    route.page
   );
 
-  renderNav();
+
+  scrollToAnchor(
+    route.anchor
+  );
 }
 
 init();

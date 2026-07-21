@@ -1,0 +1,30 @@
+<h1>render.lua</h1>
+<p>This file is responsible for low-level drawing to the terminal.</p>
+<h2>What it is</h2>
+<p>render.lua stores an internal screen buffer and provides methods for drawing text, rectangles, outlines, and pixels.</p>
+<h2>Main methods</h2>
+<h3>render:init(x, y, w, h)</h3>
+<p>Creates a buffer of the requested size.</p>
+<h3>render:clear(bg)</h3>
+<p>Clears the buffer and fills the background with <code>bg</code>.</p>
+<h3>render:pixel(x, y, ch, fg, bg, clip)</h3>
+<p>Draws a single character at the specified coordinates.</p>
+<h3>render:blit(x, y, text, fg, bg, clip, mode)</h3>
+<p>Draws a text string with colors. The <code>mode</code> argument can be <code>&quot;h&quot;</code> for horizontal drawing.</p>
+<h3>render:rect(x, y, w, h, bg, clip)</h3>
+<p>Draws a rectangle.</p>
+<h3>render:rectOutline(x, y, w, h, fg, bg, clip)</h3>
+<p>Draws a border around an area.</p>
+<h3>render:present()</h3>
+<p>Flushes the buffer contents to the terminal.</p>
+<h2>Example</h2>
+
+<pre><code class="hljs language-lua">
+<span class="hljs-keyword">local</span> render = <span class="hljs-built_in">require</span>(<span class="hljs-string">&quot;render&quot;</span>)
+<span class="hljs-keyword">local</span> r = render(<span class="hljs-number">1</span>, <span class="hljs-number">1</span>, <span class="hljs-number">20</span>, <span class="hljs-number">10</span>)
+
+r:clear(<span class="hljs-string">&quot;f&quot;</span>)
+r:rect(<span class="hljs-number">2</span>, <span class="hljs-number">2</span>, <span class="hljs-number">5</span>, <span class="hljs-number">3</span>, <span class="hljs-string">&quot;7&quot;</span>)
+r:blit(<span class="hljs-number">3</span>, <span class="hljs-number">3</span>, <span class="hljs-string">&quot;Hello&quot;</span>, <span class="hljs-string">&quot;0&quot;</span>, <span class="hljs-string">&quot;7&quot;</span>)
+r:present()
+</code></pre>

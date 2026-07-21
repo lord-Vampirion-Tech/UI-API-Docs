@@ -1,0 +1,103 @@
+<h1><code>base.lua</code></h1>
+<p>Базовый класс для всех визуальных элементов.</p>
+<p><img src="imgs/test_1.png" alt="Button"></p>
+<div class="custom-block image-layout image-left"><img src="imgs/test_2.png" alt="Button"><div class="image-content"><h2>Button</h2>
+<p>Кнопка используется для обработки событий.
+Она имеет состояния:</p>
+<ul>
+<li>normal</li>
+<li>hover</li>
+<li>pressed</li>
+</ul>
+</div></div><div class="custom-block image-layout image-right"><img src="imgs/test_3.png" alt="Button"><div class="image-content"><h2>Основные методы</h2>
+<table>
+<thead>
+<tr>
+<th>Функция</th>
+<th>Что делает</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>base:init(x, y, w, h)</code></td>
+<td>Инициализирует базовые поля элемента.</td>
+</tr>
+<tr>
+<td><code>base:draw(render, gx, gy, clip)</code></td>
+<td>Базовый метод отрисовки. В текущей реализации он пустой и предназначен для переопределения.</td>
+</tr>
+<tr>
+<td><code>base:hitTest(x, y, clip)</code></td>
+<td>Проверяет, находится ли точка внутри элемента.</td>
+</tr>
+<tr>
+<td><code>base:handleEvent(event, clip)</code></td>
+<td>Проверяет попадание мыши в область и вызывает <code>onEvent</code>.</td>
+</tr>
+<tr>
+<td><code>base:onEvent(event)</code></td>
+<td>Базовая обработка события. По умолчанию возвращает <code>true</code>.</td>
+</tr>
+</tbody></table>
+</div></div><h2>Что это?</h2>
+<p><code>base.lua</code> определяет общие свойства такие как </p>
+<ul>
+<li>позиция, </li>
+<li>размеры, </li>
+<li>видимость, </li>
+<li>цвет текста и фона, </li>
+<li>а также базовую логику обработки событий.</li>
+</ul>
+<hr>
+<h2>Основные методы</h2>
+<table>
+<thead>
+<tr>
+<th>Функция</th>
+<th>Что делает</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>base:init(x, y, w, h)</code></td>
+<td>Инициализирует базовые поля элемента.</td>
+</tr>
+<tr>
+<td><code>base:draw(render, gx, gy, clip)</code></td>
+<td>Базовый метод отрисовки. В текущей реализации он пустой и предназначен для переопределения.</td>
+</tr>
+<tr>
+<td><code>base:hitTest(x, y, clip)</code></td>
+<td>Проверяет, находится ли точка внутри элемента.</td>
+</tr>
+<tr>
+<td><code>base:handleEvent(event, clip)</code></td>
+<td>Проверяет попадание мыши в область и вызывает <code>onEvent</code>.</td>
+</tr>
+<tr>
+<td><code>base:onEvent(event)</code></td>
+<td>Базовая обработка события. По умолчанию возвращает <code>true</code>.</td>
+</tr>
+</tbody></table>
+<hr>
+<h2>Примеры работы функций</h2>
+<blockquote>
+<p>Примечание:
+При обычном использовании этот объект не будет затронут вами.<br>Он используеться для создания других классов.</p>
+</blockquote>
+<h3><code>base:init(x, y, w, h)</code></h3>
+<p>Создаеть экземпляр <code>base</code></p>
+<ul>
+<li><code>x</code>, <code>y</code> — координаты верхнего левого угла буфера;</li>
+<li><code>w</code>, <code>h</code> — ширина и высота буфера;</li>
+</ul>
+
+<pre><code class="hljs language-lua">
+<span class="hljs-keyword">local</span> ui = <span class="hljs-built_in">require</span>(<span class="hljs-string">&quot;ui&quot;</span>)
+
+<span class="hljs-keyword">local</span> item = ui.base(<span class="hljs-number">1</span>, <span class="hljs-number">1</span>, <span class="hljs-number">10</span>, <span class="hljs-number">3</span>)
+<span class="hljs-built_in">print</span>(item.x, item.y)
+</code></pre>
+<hr>
+<h3><code>base:draw(render, gx, gy, clip)</code></h3>
+<h3><code>base:hitTest(x, y, clip)</code></h3>
+<h3><code>bbase:handleEvent(event, clip)</code></h3>
+<h3><code>base:onEvent(event)</code></h3>

@@ -1,0 +1,24 @@
+<h1>utils.lua</h1>
+<p>This file contains shared helper functions for the whole library.</p>
+<h2>What it is</h2>
+<p>utils.lua implements the core mechanics for class creation, text alignment, global coordinate calculation, clipping, and area intersections.</p>
+<h2>Main functions</h2>
+<h3>utils.createClass(className, parent)</h3>
+<p>Creates a class with inheritance support and calls <code>init</code> automatically when an instance is created.</p>
+<h3>utils.align(text, width, mode)</h3>
+<p>Truncates or aligns text to a given width. Supports <code>&quot;l&quot;</code>, <code>&quot;c&quot;</code>, and <code>&quot;r&quot;</code> modes.</p>
+<h3>utils.getGlobalPos(self, gx, gy)</h3>
+<p>Returns the absolute position of an element, taking parent containers into account.</p>
+<h3>utils.getClip(self)</h3>
+<p>Returns the clip area of an element.</p>
+<h3>utils.inClip(x, y, clip)</h3>
+<p>Checks whether a point lies inside a clip area.</p>
+<h3>utils.intersectClip(a, b)</h3>
+<p>Returns the intersection of two clip areas.</p>
+<h2>Example</h2>
+
+<pre><code class="hljs language-lua">
+<span class="hljs-keyword">local</span> utils = <span class="hljs-built_in">require</span>(<span class="hljs-string">&quot;utils&quot;</span>)
+<span class="hljs-keyword">local</span> text = utils.align(<span class="hljs-string">&quot;Hello&quot;</span>, <span class="hljs-number">10</span>, <span class="hljs-string">&quot;c&quot;</span>)
+<span class="hljs-built_in">print</span>(text)
+</code></pre>

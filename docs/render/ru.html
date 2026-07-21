@@ -1,0 +1,161 @@
+<h1>render.lua</h1>
+<p>Файл отвечает за низкоуровневую отрисовку в терминал.</p>
+<blockquote>
+<p>Примечание:
+При обычном использовании этот объект не будет затронут вами.<br>Это скорее справочная информация, если вы собираетесь писать свои модули.</p>
+</blockquote>
+<h2>Что это?</h2>
+<p>render.lua хранит внутренний буфер экрана и предоставляет методы для вывода пикселей в терминал с использованием вспомогательных функций.</p>
+<hr>
+<h2>Основные методы</h2>
+<table>
+<thead>
+<tr>
+<th>Функция</th>
+<th>Что делает</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>render:init(x, y, w, h)</code></td>
+<td>Создаёт буфер нужного размера и задаёт его положение.</td>
+</tr>
+<tr>
+<td><code>render:clear(bg)</code></td>
+<td>Очищает буфер и заполняет фон цветом <code>bg</code>. (по стандарту <code>bg</code> = &quot;f&quot;)</td>
+</tr>
+<tr>
+<td><code>render:pixel(x, y, ch, fg, bg, clip)</code></td>
+<td>Рисует один символ в указанной точке.</td>
+</tr>
+<tr>
+<td><code>render:blit(x, y, text, fg, bg, clip, mode)</code></td>
+<td>Выводит строку текста с цветами. Параметр <code>mode</code> ориентация текста.</td>
+</tr>
+<tr>
+<td><code>render:rect(x, y, w, h, bg, clip)</code></td>
+<td>Рисует закрашенный прямоугольник.</td>
+</tr>
+<tr>
+<td><code>render:rectOutline(x, y, w, h, fg, bg, clip)</code></td>
+<td>Рисует рамку вокруг области.</td>
+</tr>
+<tr>
+<td><code>render:present()</code></td>
+<td>Переносит содержимое буфера на терминал.</td>
+</tr>
+</tbody></table>
+<hr>
+<h2>Примеры работы функций</h2>
+<h3><code>render:init(x, y, w, h)</code></h3>
+<p>Создаеть экземпляр <code>render</code></p>
+<ul>
+<li><code>x</code>, <code>y</code> — координаты верхнего левого угла буфера;</li>
+<li><code>w</code>, <code>h</code> — ширина и высота буфера;</li>
+<li><code>clip</code> — область в которой он может рисовать. (используеться внутри модулей);</li>
+<li>Обычно используют для создания рабочего области под интерфейс, но можно использовать и вне <code>ui.lua</code>.</li>
+</ul>
+
+<pre><code class="hljs language-lua">
+<span class="hljs-keyword">local</span> render = <span class="hljs-built_in">require</span>(<span class="hljs-string">&quot;render&quot;</span>)
+<span class="hljs-keyword">local</span> r = render(<span class="hljs-number">1</span>, <span class="hljs-number">1</span>, <span class="hljs-number">20</span>, <span class="hljs-number">10</span>)
+</code></pre>
+<hr>
+<h3><code>render:clear(bg)</code></h3>
+<p>Очищает весь буфер и заполняет его выбранным цветом.</p>
+<ul>
+<li><code>bg</code> — цвет фона.</li>
+</ul>
+
+<pre><code class="hljs language-lua">
+<span class="hljs-keyword">local</span> render = <span class="hljs-built_in">require</span>(<span class="hljs-string">&quot;render&quot;</span>)
+<span class="hljs-keyword">local</span> r = render(<span class="hljs-number">1</span>, <span class="hljs-number">1</span>, <span class="hljs-number">20</span>, <span class="hljs-number">10</span>)
+
+r:clear(<span class="hljs-string">&quot;f&quot;</span>)
+</code></pre>
+<hr>
+<h2>Функции рисования !</h2>
+<hr>
+<h3><code>render:pixel(x, y, ch, fg, bg, clip)</code></h3>
+<p>Рисует символ в нужной позиции нужным цветом.</p>
+<ul>
+<li><code>x</code>, <code>y</code> — позиция символа;</li>
+<li><code>ch</code> — символ для рисования. По стандарту равен <code>&quot; &quot;</code>;</li>
+<li><code>fg</code> — цвет текста/символа;</li>
+<li><code>bg</code> — цвет фона;</li>
+<li><code>clip</code> — необязательное ограничение области.</li>
+</ul>
+
+<pre><code class="hljs language-lua">
+<span class="hljs-keyword">local</span> render = <span class="hljs-built_in">require</span>(<span class="hljs-string">&quot;render&quot;</span>)
+<span class="hljs-keyword">local</span> r = render(<span class="hljs-number">1</span>, <span class="hljs-number">1</span>, <span class="hljs-number">20</span>, <span class="hljs-number">10</span>)
+
+r:pixel(<span class="hljs-number">3</span>, <span class="hljs-number">2</span>, <span class="hljs-string">&quot;#&quot;</span>, <span class="hljs-string">&quot;e&quot;</span>, <span class="hljs-string">&quot;0&quot;</span>)
+</code></pre>
+<hr>
+<h3><code>render:blit(x, y, text, fg, bg, clip, mode)</code></h3>
+<p>Работает как обычный <code>term.blit()</code>. Отрисовывает сразу строчку символов.</p>
+<ul>
+<li><code>x</code>, <code>y</code> — координаты начала строки;</li>
+<li><code>text</code> — строка для вывода;</li>
+<li><code>fg</code> — цвет текста;</li>
+<li><code>bg</code> — цвет фона;</li>
+<li><code>clip</code> — ограничение области, если нужно;</li>
+<li><code>mode</code> — режим вывода, например <code>&quot;h&quot;</code> для скрытого/специального режима.</li>
+</ul>
+
+<pre><code class="hljs language-lua">
+<span class="hljs-keyword">local</span> render = <span class="hljs-built_in">require</span>(<span class="hljs-string">&quot;render&quot;</span>)
+<span class="hljs-keyword">local</span> r = render(<span class="hljs-number">1</span>, <span class="hljs-number">1</span>, <span class="hljs-number">20</span>, <span class="hljs-number">10</span>)
+
+r:blit(<span class="hljs-number">2</span>, <span class="hljs-number">2</span>, <span class="hljs-string">&quot;Hello&quot;</span>, <span class="hljs-string">&quot;0&quot;</span>, <span class="hljs-string">&quot;7&quot;</span>)
+</code></pre>
+<hr>
+<h3><code>render:rect(x, y, w, h, bg, clip)</code></h3>
+<p>Рисует прямоугольник в определенной позцици, нужного размера и цвета.</p>
+<ul>
+<li><code>x</code>, <code>y</code> — позиция верхнего левого угла;</li>
+<li><code>w</code>, <code>h</code> — ширина и высота прямоугольника;</li>
+<li><code>bg</code> — цвет заливки;</li>
+<li><code>clip</code> — необязательное ограничение области.</li>
+</ul>
+
+<pre><code class="hljs language-lua">
+<span class="hljs-keyword">local</span> render = <span class="hljs-built_in">require</span>(<span class="hljs-string">&quot;render&quot;</span>)
+<span class="hljs-keyword">local</span> r = render(<span class="hljs-number">1</span>, <span class="hljs-number">1</span>, <span class="hljs-number">20</span>, <span class="hljs-number">10</span>)
+
+r:rect(<span class="hljs-number">2</span>, <span class="hljs-number">2</span>, <span class="hljs-number">6</span>, <span class="hljs-number">3</span>, <span class="hljs-string">&quot;7&quot;</span>)
+</code></pre>
+<hr>
+<h3><code>render:rectOutline(x, y, w, h, fg, bg, clip)</code></h3>
+<p>Рисует рамку прямоугольника в определенной позцици, нужного размера и цвета.</p>
+<ul>
+<li><code>x</code>, <code>y</code> — позиция рамки;</li>
+<li><code>w</code>, <code>h</code> — размеры рамки;</li>
+<li><code>fg</code> — цвет линий рамки;</li>
+<li><code>bg</code> — цвет фона внутри рамки;</li>
+<li><code>clip</code> — необязательное ограничение области.</li>
+</ul>
+
+<pre><code class="hljs language-lua">
+<span class="hljs-keyword">local</span> render = <span class="hljs-built_in">require</span>(<span class="hljs-string">&quot;render&quot;</span>)
+<span class="hljs-keyword">local</span> r = render(<span class="hljs-number">1</span>, <span class="hljs-number">1</span>, <span class="hljs-number">20</span>, <span class="hljs-number">10</span>)
+
+r:rectOutline(<span class="hljs-number">2</span>, <span class="hljs-number">2</span>, <span class="hljs-number">6</span>, <span class="hljs-number">3</span>, <span class="hljs-string">&quot;e&quot;</span>, <span class="hljs-string">&quot;0&quot;</span>)
+</code></pre>
+<hr>
+<h3><code>render:present()</code></h3>
+<p>Выводит данные из буфера на экран терминала/монитора.</p>
+<ul>
+<li>Не принимает аргументов;</li>
+<li>Отправляет текущий буфер на экран и делает результат видимым.</li>
+<li>Обычно вызывается в конце кадра или после всех изменений.</li>
+</ul>
+
+<pre><code class="hljs language-lua">
+<span class="hljs-keyword">local</span> render = <span class="hljs-built_in">require</span>(<span class="hljs-string">&quot;render&quot;</span>)
+<span class="hljs-keyword">local</span> r = render(<span class="hljs-number">1</span>, <span class="hljs-number">1</span>, <span class="hljs-number">20</span>, <span class="hljs-number">10</span>)
+
+r:clear(<span class="hljs-string">&quot;f&quot;</span>)
+r:blit(<span class="hljs-number">2</span>, <span class="hljs-number">2</span>, <span class="hljs-string">&quot;OK&quot;</span>, <span class="hljs-string">&quot;0&quot;</span>, <span class="hljs-string">&quot;7&quot;</span>)
+r:present()
+</code></pre>

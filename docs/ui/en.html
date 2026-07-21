@@ -1,0 +1,27 @@
+<h1>ui.lua</h1>
+<p>This file is the root container of the library.</p>
+<h2>What it is</h2>
+<p>ui.lua collects all available modules from the <code>modules</code> folder, exposes them on the <code>ui</code> object, and provides methods for adding elements, drawing, and handling events.</p>
+<h2>Main methods</h2>
+<h3>ui:add(element)</h3>
+<p>Adds an element to the UI list and binds it to the parent container.</p>
+<h3>ui:draw()</h3>
+<p>Redraws all visible elements.</p>
+<h3>ui.handleEvent(event, clip)</h3>
+<p>Traverses elements in reverse order and invokes their event handling.</p>
+<h3>ui:start()</h3>
+<p>Starts the main event loop: waits for events, processes them, redraws the interface, and displays it.</p>
+<h2>Example</h2>
+
+<pre><code class="hljs language-lua">
+<span class="hljs-keyword">local</span> ui = <span class="hljs-built_in">require</span>(<span class="hljs-string">&quot;ui&quot;</span>)
+
+
+<span class="hljs-keyword">local</span> title = ui.label(<span class="hljs-number">2</span>, <span class="hljs-number">2</span>, <span class="hljs-number">20</span>, <span class="hljs-string">&quot;Hello&quot;</span>)
+<span class="hljs-keyword">local</span> title = ui.label(<span class="hljs-number">2</span>, <span class="hljs-number">2</span>, <span class="hljs-number">20</span>, <span class="hljs-string">&quot;Hello&quot;</span>)
+<span class="hljs-keyword">local</span> title = ui.label(<span class="hljs-number">2</span>, <span class="hljs-number">2</span>, <span class="hljs-number">20</span>, <span class="hljs-string">&quot;Helasdasdasdlo&quot;</span>)
+<span class="hljs-keyword">local</span> title = ui.label(<span class="hljs-number">2</span>, <span class="hljs-number">2</span>, <span class="hljs-number">20</span>, <span class="hljs-string">&quot;asdasdasdasdaHello&quot;</span>)
+ui:add(title)
+ui:start()
+
+</code></pre>

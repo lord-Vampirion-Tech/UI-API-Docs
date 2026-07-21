@@ -1,0 +1,25 @@
+<h1>button.lua</h1>
+<p>Кнопка с простым состоянием: нормальная, нажатая и отключённая.</p>
+<h2>Что это</h2>
+<p>button.lua создаёт интерактивную кнопку, которая реагирует на <code>mouse_click</code> и <code>mouse_up</code>.</p>
+<h2>Конструктор</h2>
+
+<pre><code class="hljs language-lua">
+ui.button(x, y, w, h, text, align, callback_left, callback_right)
+</code></pre>
+<h2>Основные свойства</h2>
+<ul>
+<li><code>text</code> — надпись на кнопке;</li>
+<li><code>align</code> — выравнивание текста (<code>&quot;l&quot;</code>, <code>&quot;c&quot;</code>, <code>&quot;r&quot;</code>);</li>
+<li><code>callback_left</code> — функция для левой кнопки мыши;</li>
+<li><code>callback_right</code> — функция для правой кнопки мыши.</li>
+</ul>
+<h2>Пример</h2>
+
+<pre><code class="hljs language-lua">
+<span class="hljs-keyword">local</span> ui = <span class="hljs-built_in">require</span>(<span class="hljs-string">&quot;ui&quot;</span>)
+<span class="hljs-keyword">local</span> b = ui.button(<span class="hljs-number">2</span>, <span class="hljs-number">2</span>, <span class="hljs-number">10</span>, <span class="hljs-number">3</span>, <span class="hljs-string">&quot;OK&quot;</span>, <span class="hljs-string">&quot;c&quot;</span>, <span class="hljs-function"><span class="hljs-keyword">function</span><span class="hljs-params">()</span></span>
+  <span class="hljs-built_in">print</span>(<span class="hljs-string">&quot;Pressed&quot;</span>)
+<span class="hljs-keyword">end</span>)
+ui:add(b)
+</code></pre>

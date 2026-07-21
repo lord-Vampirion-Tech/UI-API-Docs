@@ -1,0 +1,192 @@
+<h1>utils.lua</h1>
+<p>Файл содержит общие вспомогательные функции для всей библиотеки.</p>
+<blockquote>
+<p>Примечание:
+При обычном использовании этот объект не будет затронут вами.<br>Это скорее справочная информация, если вы собираетесь писать свои модули.</p>
+</blockquote>
+<h2>Что это?</h2>
+<p>utils.lua реализует базовые механики: создание классов, выравнивание текста, вычисление глобальных координат, работу с clipping и пересечением областей.</p>
+<hr>
+<h2>Основные функции</h2>
+<table>
+<thead>
+<tr>
+<th>Функция</th>
+<th>Что делает</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>utils.createClass(className, parent)</code></td>
+<td>Создаёт класс с поддержкой наследования и вызова <code>init</code> при создании экземпляра.</td>
+</tr>
+<tr>
+<td><code>utils.align(text, width, mode)</code></td>
+<td>Обрезает или выравнивает текст по ширине.</td>
+</tr>
+<tr>
+<td><code>utils.getGlobalPos(self, gx, gy)</code></td>
+<td>Возвращает абсолютные координаты элемента с учётом его родителей.</td>
+</tr>
+<tr>
+<td><code>utils.getClip(self)</code></td>
+<td>Возвращает clip-область элемента.</td>
+</tr>
+<tr>
+<td><code>utils.inClip(x, y, clip)</code></td>
+<td>Проверяет, находится ли точка внутри clip.</td>
+</tr>
+<tr>
+<td><code>utils.intersectClip(a, b)</code></td>
+<td>Возвращает пересечение двух clip-областей.</td>
+</tr>
+</tbody></table>
+<hr>
+<h2>Примеры работы функций</h2>
+<h3><code>utils.createClass(className, parent)</code></h3>
+<p>Функция создания нового класса.</p>
+<ul>
+<li><code>className</code> — наименование нового класса. Обязательно;</li>
+<li><code>parent</code> — от какого класса наследоваться. Не обязательно.</li>
+</ul>
+
+<pre><code class="hljs language-lua">
+<span class="hljs-keyword">local</span> utils = <span class="hljs-built_in">require</span>(<span class="hljs-string">&quot;utils&quot;</span>)
+<span class="hljs-keyword">local</span> newClass = utils.createClass(<span class="hljs-string">&quot;newClass&quot;</span>)
+
+<span class="hljs-comment">-- с наследованием</span>
+<span class="hljs-keyword">local</span> base = <span class="hljs-built_in">require</span>(<span class="hljs-string">&quot;modules.base&quot;</span>)
+<span class="hljs-keyword">local</span> newClass = utils.createClass(<span class="hljs-string">&quot;newClass&quot;</span>,base) 
+<span class="hljs-comment">-- или передать его напрямую как параметр `(&quot;newClass&quot;,require(&quot;modules.base&quot;)) `</span>
+</code></pre>
+<hr>
+<h3><code>utils.align(text, width, mode)</code></h3>
+<p>Возвращает выровненный текст в заданном режиме и при заданной длине.</p>
+<ul>
+<li><code>text</code> — текст, который нужно выровнять;</li>
+<li><code>width</code> — ширина строки, по которой нужно выровнять;</li>
+<li><code>mode</code> — режим выравнивания. По умолчанию выбран режим <code>&quot;l&quot;</code>, то есть — слева;<ul>
+<li>режимы работы:</li>
+<li><code>&quot;l&quot;</code> — выровнять по левому краю;</li>
+<li><code>&quot;c&quot;</code> — выровнять по центру;</li>
+<li><code>&quot;r&quot;</code> — выровнять по правому краю.</li>
+</ul>
+</li>
+</ul>
+
+<pre><code class="hljs language-lua">
+<span class="hljs-keyword">local</span> utils = <span class="hljs-built_in">require</span>(<span class="hljs-string">&quot;utils&quot;</span>)
+
+<span class="hljs-keyword">local</span> text = <span class="hljs-string">&quot;test text&quot;</span>
+
+<span class="hljs-keyword">local</span> newText_l = utils.align(text,<span class="hljs-number">20</span>) <span class="hljs-comment">-- для &quot;l&quot; можно не писать</span>
+<span class="hljs-comment">-- выдаст строку &quot;test text           &quot;</span>
+<span class="hljs-keyword">local</span> newText_c = utils.align(text,<span class="hljs-number">20</span>,<span class="hljs-string">&quot;c&quot;</span>)
+<span class="hljs-comment">-- выдаст строку &quot;     test text      &quot;</span>
+<span class="hljs-keyword">local</span> newText_r = utils.align(text,<span class="hljs-number">20</span>,<span class="hljs-string">&quot;r&quot;</span>)
+<span class="hljs-comment">-- выдаст строку &quot;           test text&quot;</span>
+</code></pre>
+<hr>
+<h3><code>utils.getGlobalPos(self, gx, gy)</code></h3>
+<p>Возвращает глобальную позицию объекта, исходя из локальной позиции через <code>self</code> и учёта позиции родителя. Если родителя нет, просто возвращает позицию.</p>
+<ul>
+<li><code>self</code> — текущий класс, в котором идёт работа;</li>
+<li><code>gx, gy</code> — позиция родителя, передаваемая при вызове функции <code>:draw()</code>.</li>
+</ul>
+
+<pre><code class="hljs language-lua">
+<span class="hljs-keyword">local</span> utils = <span class="hljs-built_in">require</span>(<span class="hljs-string">&quot;utils&quot;</span>)
+
+<span class="hljs-comment">--</span>
+<span class="hljs-comment">-- допустим мы создали новый класс и пишем функцию для его отрисовки</span>
+<span class="hljs-comment">--</span>
+
+<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">newClass:draw</span><span class="hljs-params">(render, gx, gy, clip)</span></span>
+<span class="hljs-comment">-- поля render, gx, gy и clip передаются ранее от родителя, который вызвал эту функцию</span>
+
+<span class="hljs-comment">-- так мы получим позицию данного объекта</span>
+<span class="hljs-keyword">local</span> x, y = utils.getGlobalPos(<span class="hljs-built_in">self</span>, gx, gy)
+
+<span class="hljs-comment">--</span>
+<span class="hljs-comment">-- а далее мы можем их использовать для чего угодно</span>
+<span class="hljs-comment">--</span>
+
+<span class="hljs-keyword">end</span>
+</code></pre>
+<hr>
+<h3><code>utils.getClip(self)</code></h3>
+<p>Получить зону, в которой может быть отрисован объект.</p>
+<ul>
+<li><code>self</code> — текущий класс, в котором идёт работа.</li>
+</ul>
+
+<pre><code class="hljs language-lua">
+<span class="hljs-keyword">local</span> utils = <span class="hljs-built_in">require</span>(<span class="hljs-string">&quot;utils&quot;</span>)
+
+<span class="hljs-comment">--</span>
+<span class="hljs-comment">-- допустим мы создали новый класс и пишем функцию для его отрисовки</span>
+<span class="hljs-comment">-- тут нам еще понадобиться получить собственную clip-область если мы делаем контейнер или его подобие</span>
+<span class="hljs-comment">--</span>
+
+<span class="hljs-keyword">local</span> myClip = utils.getClip(<span class="hljs-built_in">self</span>)
+
+<span class="hljs-comment">-- вот так выглядит обьект `clip`</span>
+clip = {
+  x, y,
+  w, h
+}
+
+<span class="hljs-keyword">end</span>
+</code></pre>
+<hr>
+<h3><code>utils.inClip(x, y, clip)</code></h3>
+<p>Проверяет, находится ли позиция внутри clip-области. Возвращает <code>true</code> или <code>false</code>.</p>
+<ul>
+<li><code>x</code>, <code>y</code> — позиция;</li>
+<li><code>clip</code> — clip-область.</li>
+</ul>
+
+<pre><code class="hljs language-lua">
+<span class="hljs-keyword">local</span> utils = <span class="hljs-built_in">require</span>(<span class="hljs-string">&quot;utils&quot;</span>)
+
+<span class="hljs-keyword">local</span> inClip = utils.inClip(<span class="hljs-number">10</span>, <span class="hljs-number">10</span>, clip)
+
+<span class="hljs-keyword">end</span>
+</code></pre>
+<blockquote>
+<p>Подсказка:
+По большей части метод используется в объекте render для ограничения рисования.</p>
+</blockquote>
+<hr>
+<h3><code>utils.intersectClip(a, b)</code></h3>
+<p>Возвращает новую clip-область, полученную из двух входных.</p>
+<ul>
+<li><code>a</code>, <code>b</code> — две clip-зоны. Первая — родительская, вторая — собственная.</li>
+<li>Порядок имеет значение.</li>
+</ul>
+
+<pre><code class="hljs language-lua">
+<span class="hljs-keyword">local</span> utils = <span class="hljs-built_in">require</span>(<span class="hljs-string">&quot;utils&quot;</span>)
+
+<span class="hljs-comment">-- создаём 2 clip-зоны</span>
+
+<span class="hljs-keyword">local</span> clip_1 = {
+  x = <span class="hljs-number">1</span>, y = <span class="hljs-number">1</span>,
+  w = <span class="hljs-number">10</span>, h = <span class="hljs-number">10</span>
+}
+
+<span class="hljs-keyword">local</span> clip_2 = {
+  x = <span class="hljs-number">5</span>, y = <span class="hljs-number">5</span>,
+  w = <span class="hljs-number">10</span>, h = <span class="hljs-number">10</span>
+}
+
+<span class="hljs-comment">-- и вызовем метод intersectClip</span>
+<span class="hljs-keyword">local</span> newClip = utils.intersectClip(clip_1, clip_2)
+
+<span class="hljs-comment">-- он будет равен:</span>
+<span class="hljs-comment">-- x = 5, y = 5</span>
+<span class="hljs-comment">-- w = 5, h = 5</span>
+<span class="hljs-comment">-- так как первый clip обрезал второй</span>
+
+<span class="hljs-comment">-- если поменять местами параметры в функции, то зона будет равна clip_1</span>
+
+</code></pre>

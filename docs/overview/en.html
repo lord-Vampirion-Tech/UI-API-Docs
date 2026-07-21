@@ -1,0 +1,38 @@
+<h1>UI library overview</h1>
+<p>This is a small library for building user interfaces in CraftOS-PC. It is built around a render buffer, a shared UI container, and a set of components such as buttons, labels, checkboxes, panels, lists, sliders, and tabs.</p>
+<h2>Core idea</h2>
+<p>The library follows an event-driven model:</p>
+<ol>
+<li>Create a UI container instance.</li>
+<li>Add elements to it.</li>
+<li>The UI handles mouse events and redraws the interface.</li>
+</ol>
+<h2>Main parts</h2>
+<ul>
+<li>render — a drawing buffer that stores characters, text colors, and background colors.</li>
+<li>utils — helper functions for class creation, text alignment, coordinates, and clipping.</li>
+<li>ui — the root application container that stores elements and runs the event loop.</li>
+<li>modules — ready-made UI components.</li>
+</ul>
+<h2>Quick start</h2>
+
+<pre><code class="hljs language-lua">
+<span class="hljs-keyword">local</span> ui = <span class="hljs-built_in">require</span>(<span class="hljs-string">&quot;ui&quot;</span>)
+
+<span class="hljs-keyword">local</span> title = ui.label(<span class="hljs-number">2</span>, <span class="hljs-number">2</span>, <span class="hljs-number">20</span>, <span class="hljs-string">&quot;Hello&quot;</span>, <span class="hljs-string">&quot;c&quot;</span>)
+<span class="hljs-keyword">local</span> button = ui.button(<span class="hljs-number">2</span>, <span class="hljs-number">4</span>, <span class="hljs-number">12</span>, <span class="hljs-number">3</span>, <span class="hljs-string">&quot;OK&quot;</span>, <span class="hljs-string">&quot;c&quot;</span>, <span class="hljs-function"><span class="hljs-keyword">function</span><span class="hljs-params">()</span></span>
+  <span class="hljs-built_in">print</span>(<span class="hljs-string">&quot;Clicked&quot;</span>)
+<span class="hljs-keyword">end</span>)
+
+ui:add(title)
+ui:add(button)
+ui:start()
+</code></pre>
+<h2>What you can build</h2>
+<ul>
+<li>simple windows and panels;</li>
+<li>buttons and toggle controls;</li>
+<li>lists and dropdown menus;</li>
+<li>tabs and sliders;</li>
+<li>element positioning, visibility, and event handling.</li>
+</ul>

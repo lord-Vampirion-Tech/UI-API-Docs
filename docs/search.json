@@ -1,0 +1,94 @@
+[
+  {
+    "id": "overview",
+    "title": {
+      "ru": "Обзор библиотеки",
+      "en": "Overview"
+    },
+    "tags": [
+      "обзор",
+      "ui",
+      "библиотека",
+      "overview",
+      "library"
+    ],
+    "depth": 0
+  },
+  {
+    "id": "render",
+    "title": {
+      "ru": "рендеринг",
+      "en": "render.lua"
+    },
+    "tags": [
+      "рендеринг",
+      "графика",
+      "буфер",
+      "render",
+      "graphics",
+      "buffer"
+    ],
+    "depth": 0
+  },
+  {
+    "id": "ui",
+    "title": {
+      "ru": "ui",
+      "en": "ui.lua"
+    },
+    "tags": [
+      "ui",
+      "ядро",
+      "контейнер",
+      "core",
+      "container"
+    ],
+    "depth": 2
+  },
+  {
+    "id": "utils",
+    "title": {
+      "ru": "Утилита",
+      "en": "utils.lua"
+    },
+    "tags": [
+      "утилита",
+      "помощь",
+      "библиотке",
+      "utils",
+      "helpers",
+      "library"
+    ],
+    "depth": 0
+  },
+  {
+    "id": "base",
+    "title": {
+      "ru": "Базовый класс",
+      "en": "base.lua"
+    },
+    "tags": [
+      "база,",
+      "ядро,",
+      "ui",
+      "base,",
+      "core,"
+    ],
+    "depth": 2
+  },
+  {
+    "id": "button",
+    "title": {
+      "ru": "кнопка",
+      "en": "button"
+    },
+    "tags": [
+      "ui",
+      "кнопка",
+      "входы",
+      "button",
+      "input"
+    ],
+    "depth": 2
+  }
+]

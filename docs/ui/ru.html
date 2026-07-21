@@ -1,0 +1,49 @@
+<h1>ui.lua</h1>
+<p>Файл является корневым контейнером библиотеки.  </p>
+<blockquote>
+<p>Примечание:
+При обычном использовании большинство методов не будет затронут вами.<br>Это скорее справочная информация, как работает код ui.lua</p>
+</blockquote>
+<h2>Что это ?</h2>
+<p>ui.lua собирает все доступные модули из папки <code>modules</code>, добавляет их в объект <code>ui</code> и предоставляет методы для добавления элементов, рисования и обработки событий.</p>
+<hr>
+<h2>Основные методы</h2>
+<table>
+<thead>
+<tr>
+<th>Функция</th>
+<th>Что делает</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>ui:add(element)</code></td>
+<td>Добавляет элемент в список UI и привязывает его к родителю.</td>
+</tr>
+<tr>
+<td><code>ui:draw()</code></td>
+<td>Отрисовывает/Перерисовывает все видимые элементы.</td>
+</tr>
+<tr>
+<td><code>ui.handleEvent(event, clip)</code></td>
+<td>Обходит элементы в обратном порядке и вызывает их обработку событий.</td>
+</tr>
+<tr>
+<td><code>ui:start()</code></td>
+<td>Запускает бесконечный цикл событий: ждёт события, обрабатывает их, перерисовывает интерфейс и выводит его на экран.</td>
+</tr>
+</tbody></table>
+<h2>Пример</h2>
+
+<pre><code class="hljs language-lua">
+<span class="hljs-keyword">local</span> ui = <span class="hljs-built_in">require</span>(<span class="hljs-string">&quot;ui&quot;</span>)
+
+
+<span class="hljs-keyword">local</span> title = ui.label(<span class="hljs-number">2</span>, <span class="hljs-number">2</span>, <span class="hljs-number">20</span>, <span class="hljs-string">&quot;Hello&quot;</span>)
+<span class="hljs-keyword">local</span> title = ui.label(<span class="hljs-number">2</span>, <span class="hljs-number">2</span>, <span class="hljs-number">20</span>, <span class="hljs-string">&quot;Hello&quot;</span>)
+ui:add(title)
+ui:start()
+</code></pre>
+<blockquote>
+<p>Предупреждение:
+пока что код ui не умеет адеквтано (по моему мнению) работать с логикой основной программы.<br>При желании можно запускать паралельные циклы <code>ui:start</code> и вашей основной программы.<br>Над решением проблемы уже работаю</p>
+</blockquote>

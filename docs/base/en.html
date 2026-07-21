@@ -1,0 +1,22 @@
+<h1><code>base.lua</code></h1>
+<p>The base class for all visual elements.</p>
+<h2>What it is</h2>
+<p><code>base.lua</code> defines shared properties such as position, size, visibility, text color, and background color, as well as the base event-handling logic.</p>
+<h2>Main methods</h2>
+<h3><code>base:init(x, y, w, h)</code></h3>
+<p>Initializes the base fields of an element.</p>
+<h3><code>base:draw(render, gx, gy, clip)</code></h3>
+<p>The base drawing method. In the current implementation it is empty and intended to be overridden.</p>
+<h3><code>base:hitTest(x, y, clip)</code></h3>
+<p>Checks whether a point lies inside the element.</p>
+<h3><code>base:handleEvent(event, clip)</code></h3>
+<p>Checks whether the mouse is inside the area and calls <code>onEvent</code>.</p>
+<h3><code>base:onEvent(event)</code></h3>
+<p>The base event handler. By default it returns <code>true</code>.</p>
+<h2>Example</h2>
+
+<pre><code class="hljs language-lua">
+<span class="hljs-keyword">local</span> ui = <span class="hljs-built_in">require</span>(<span class="hljs-string">&quot;ui&quot;</span>)
+<span class="hljs-keyword">local</span> item = ui.base(<span class="hljs-number">1</span>, <span class="hljs-number">1</span>, <span class="hljs-number">10</span>, <span class="hljs-number">3</span>)
+<span class="hljs-built_in">print</span>(item.x, item.y)
+</code></pre>
