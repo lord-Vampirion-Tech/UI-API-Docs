@@ -19,11 +19,6 @@ const searchInput = document.getElementById("search");
 const projectName = document.getElementById("project-name");
 history.scrollRestoration = "manual";
 
-const BASE =
-location.pathname.split('/')[1]
-  ? `/${location.pathname.split('/')[1]}/`
-  : "/";
-
 // ===================== THEME =====================
 
 const sunIcon = `
@@ -97,7 +92,7 @@ async function loadRoot() {
 
   const htmlRes =
     await fetch(
-      `${BASE}docs/root/${state.lang}.html`
+      `docs/root/${state.lang}.html`
     );
 
   if (!htmlRes.ok)
@@ -105,7 +100,7 @@ async function loadRoot() {
 
   const metaRes =
     await fetch(
-      `${BASE}docs/root/${state.lang}.json`
+      `docs/root/${state.lang}.json`
     );
 
   const html =
@@ -143,7 +138,7 @@ async function updateProjectTitle() {
 
   const res =
     await fetch(
-      `${BASE}docs/root/${state.lang}.json`
+      `docs/root/${state.lang}.json`
     );
 
 
@@ -317,7 +312,7 @@ function scrollToAnchor(anchor) {
 async function loadPages() {
   state.pages =
     await fetch(
-      `${BASE}docs/pages.json`
+      "docs/pages.json"
     ).then(r => r.json());
 
   state.pages =
@@ -361,7 +356,7 @@ async function loadPages() {
 async function loadSearch() {
   const data =
     await fetch(
-      `${BASE}/search.json`
+      "docs/search.json"
     ).then(r => r.json());
 
   state.searchIndex =
@@ -484,7 +479,7 @@ async function loadPage(id) {
 
     let res =
       await fetch(
-        `${BASE}docs/${id}/${state.lang}.html`
+        `docs/${id}/${state.lang}.html`
       );
 
     if (!res.ok) {
@@ -495,7 +490,7 @@ async function loadPage(id) {
 
       res =
         await fetch(
-          `${BASE}docs/${id}/${fallback}.html`
+          `docs/${id}/${fallback}.html`
         );
     }
 
