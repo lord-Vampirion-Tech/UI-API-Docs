@@ -92,7 +92,7 @@ async function loadRoot() {
 
   const htmlRes =
     await fetch(
-      `docs/root/${state.lang}.html`
+      `docs/root/${state.lang}.html` 
     );
 
   if (!htmlRes.ok)
