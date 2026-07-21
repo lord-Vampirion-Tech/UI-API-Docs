@@ -356,7 +356,7 @@ async function loadPages() {
 async function loadSearch() {
   const data =
     await fetch(
-      "/docs/search.json"
+      "./docs/search.json"
     ).then(r => r.json());
 
   state.searchIndex =
