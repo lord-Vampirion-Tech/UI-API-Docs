@@ -92,7 +92,7 @@ async function loadRoot() {
 
   const htmlRes =
     await fetch(
-      `docs/root/${state.lang}.html`
+      `/docs/root/${state.lang}.html`
     );
 
   if (!htmlRes.ok)
@@ -100,7 +100,7 @@ async function loadRoot() {
 
   const metaRes =
     await fetch(
-      `docs/root/${state.lang}.json`
+      `/docs/root/${state.lang}.json`
     );
 
   const html =
@@ -138,7 +138,7 @@ async function updateProjectTitle() {
 
   const res =
     await fetch(
-      `docs/root/${state.lang}.json`
+      `/docs/root/${state.lang}.json`
     );
 
 
@@ -312,7 +312,7 @@ function scrollToAnchor(anchor) {
 async function loadPages() {
   state.pages =
     await fetch(
-      "docs/pages.json"
+      "/docs/pages.json"
     ).then(r => r.json());
 
   state.pages =
@@ -356,7 +356,7 @@ async function loadPages() {
 async function loadSearch() {
   const data =
     await fetch(
-      "docs/search.json"
+      "/docs/search.json"
     ).then(r => r.json());
 
   state.searchIndex =
@@ -479,7 +479,7 @@ async function loadPage(id) {
 
     let res =
       await fetch(
-        `docs/${id}/${state.lang}.html`
+        `/docs/${id}/${state.lang}.html`
       );
 
     if (!res.ok) {
@@ -490,7 +490,7 @@ async function loadPage(id) {
 
       res =
         await fetch(
-          `docs/${id}/${fallback}.html`
+          `/docs/${id}/${fallback}.html`
         );
     }
 
